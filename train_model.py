@@ -2,14 +2,14 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import PassiveAggressiveClassifier
-from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+from sklearn.metrics import accuracy_score, classification_report
 import pickle
 
 # Step 1: Load the dataset
-df = pd.read_csv("fake_or_real_news.csv")
+df = pd.read_csv("fake_or_real_news.csv")  # Ensure this file exists in the same directory
 
 # Step 2: Keep only relevant columns
-# Assuming dataset has 'text' and 'label' columns after merging
+# The dataset must have 'text' and 'label' columns
 df = df[['text', 'label']]
 
 # Step 3: Split into training and testing sets
@@ -21,14 +21,14 @@ vectorizer = TfidfVectorizer(stop_words='english', max_df=0.7)
 X_train_vec = vectorizer.fit_transform(X_train)
 X_test_vec = vectorizer.transform(X_test)
 
-# Step 5: Train the model
+# Step 5: Train the PassiveAggressiveClassifier
 model = PassiveAggressiveClassifier(max_iter=50)
 model.fit(X_train_vec, y_train)
 
 # Step 6: Evaluate the model
 y_pred = model.predict(X_test_vec)
-acc = accuracy_score(y_test, y_pred)
-print(f"✅ Model trained successfully with accuracy: {acc * 100:.2f}%\n")
+accuracy = accuracy_score(y_test, y_pred)
+print(f"\n✅ Model trained successfully with accuracy: {accuracy * 100:.2f}%\n")
 print("🧪 Classification Report:\n", classification_report(y_test, y_pred))
 
 # Step 7: Save the model and vectorizer

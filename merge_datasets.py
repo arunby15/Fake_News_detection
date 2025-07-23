@@ -1,20 +1,25 @@
 import pandas as pd
 
-# Load the fake and real datasets
-fake_df = pd.read_csv("Fake.csv")
-real_df = pd.read_csv("True.csv")
+# Load both datasets
+true_df = pd.read_csv('True.csv')
+fake_df = pd.read_csv('Fake.csv')
 
-# Add a label column: 'FAKE' for fake news, 'REAL' for real news
-fake_df["label"] = "FAKE"
-real_df["label"] = "REAL"
+# Add label column
+true_df['label'] = 'REAL'
+fake_df['label'] = 'FAKE'
 
-# Combine the datasets
-combined_df = pd.concat([fake_df, real_df], ignore_index=True)
+# Keep only relevant columns
+true_df = true_df[['title']].rename(columns={'title': 'text'})
+fake_df = fake_df[['title']].rename(columns={'title': 'text'})
 
-# Shuffle the dataset
+# Add labels again (after renaming)
+true_df['label'] = 'REAL'
+fake_df['label'] = 'FAKE'
+
+# Merge and shuffle
+combined_df = pd.concat([true_df, fake_df], ignore_index=True)
 combined_df = combined_df.sample(frac=1, random_state=42).reset_index(drop=True)
 
-# Save the combined dataset to a CSV file
-combined_df.to_csv("fake_or_real_news.csv", index=False)
-
-print("✅ Merged dataset saved as fake_or_real_news.csv")
+# Save merged dataset
+combined_df.to_csv('fake_or_real_news.csv', index=False)
+print("✅ Dataset merged and saved as fake_or_real_news.csv")

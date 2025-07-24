@@ -3,3 +3,7 @@ __pycache__/
 *.pkl
 .env
 .ipynb_checkpoints/
+fake_or_real_news.csv
+Fake.csv
+True.csv
+*.pkl

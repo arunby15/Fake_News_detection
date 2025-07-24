@@ -1,38 +1,52 @@
-from flask import Flask, render_template, request
-import pickle
+from flask import Flask, render_template, request, redirect, url_for, session
+import joblib
+import os
+
+app = Flask(__name__)
+app.secret_key = 'admin123'  # For session encryption
 
 # Load model and vectorizer
-model = pickle.load(open("model.pkl", "rb"))
-vectorizer = pickle.load(open("vectorizer.pkl", "rb"))
+model = joblib.load('model.pkl')
+vectorizer = joblib.load('vectorizer.pkl')
 
-# Initialize Flask app
-app = Flask(__name__)
+# Dummy login credentials
+USERNAME = 'admin'
+PASSWORD = 'admin123'
 
-# Home page
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return redirect('/login')
 
-# Prediction route
-@app.route('/predict', methods=["POST"])
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    error = None
+    if request.method == 'POST':
+        if request.form['username'] == USERNAME and request.form['password'] == PASSWORD:
+            session['user'] = USERNAME
+            return redirect('/predict')
+        else:
+            error = 'Invalid credentials. Try again.'
+    return render_template('login.html', error=error)
+
+@app.route('/predict', methods=['GET', 'POST'])
 def predict():
-    if request.method == "POST":
-        news = request.form['news']
+    if 'user' not in session:
+        return redirect('/login')
 
-        if not news.strip():
-            return render_template('index.html', prediction="⚠️ Please enter valid news text.")
+    prediction = None
+    if request.method == 'POST':
+        text = request.form['news']
+        vectorized = vectorizer.transform([text])
+        result = model.predict(vectorized)
+        print(f"🔍 Prediction result: {result}")  # Debug output
 
-        # Vectorize input
-        news_vector = vectorizer.transform([news])
-        prediction = model.predict(news_vector)
-        confidence = model.decision_function(news_vector)
+        prediction = 'Real News' if result[0] == 1 else 'Fake News'
+    return render_template('index.html', prediction=prediction)
 
-        return render_template(
-            'index.html',
-            prediction=f"📰 This news is predicted as: {prediction[0]}",
-            confidence=f"📊 Confidence Score: {round(confidence[0], 2)}"
-        )
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.pop('user', None)
+    return redirect('/login')
 
-# Run app
 if __name__ == '__main__':
     app.run(debug=True)

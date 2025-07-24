@@ -7,3 +7,6 @@ fake_or_real_news.csv
 Fake.csv
 True.csv
 *.pkl
+Fake.csv
+True.csv
+fake_or_real_news.csv
